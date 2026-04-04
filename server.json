@@ -1,0 +1,37 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "eu.ansvar/british-energy-regulation-mcp",
+  "description": "Query British energy regulation: Ofgem RIIO price controls, NESO grid codes and capacity market, DESNZ energy policy and CfD, HSE offshore and gas safety",
+  "repository": {
+    "url": "https://github.com/Ansvar-Systems/british-energy-regulation-mcp",
+    "source": "github"
+  },
+  "homepage": "https://ansvar.eu",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "keywords": [
+    "ofgem",
+    "neso",
+    "desnz",
+    "hse",
+    "riio",
+    "british-energy-regulation",
+    "uk",
+    "energy",
+    "grid-code",
+    "capacity-market",
+    "compliance",
+    "mcp",
+    "ansvar"
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@ansvar/british-energy-regulation-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

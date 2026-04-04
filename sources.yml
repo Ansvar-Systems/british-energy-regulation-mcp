@@ -1,0 +1,93 @@
+# sources.yml -- Data provenance metadata
+# Reference: docs/mcp-infrastructure-blueprint.md
+
+schema_version: "1.0"
+mcp_name: "British Energy Regulation MCP"
+category: "domain_intelligence"
+jurisdiction: "United Kingdom"
+
+sources:
+  - name: "Ofgem (Office of Gas and Electricity Markets)"
+    authority: "Ofgem"
+    official_url: "https://ofgem.gov.uk"
+    retrieval_method: "MANUAL_CURATION"
+    format: "HTML"
+    authentication: "none"
+    update_frequency: "quarterly"
+    license:
+      type: "Open Government Licence v3.0"
+      url: "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+      summary: "UK government publications are freely available under OGL"
+    coverage:
+      scope: "RIIO price controls, licence conditions, supplier obligations, enforcement actions"
+      item_count: 0
+    languages:
+      - "en"
+
+  - name: "NESO (National Energy System Operator)"
+    authority: "NESO"
+    official_url: "https://nationalgrideso.com"
+    retrieval_method: "MANUAL_CURATION"
+    format: "PDF"
+    authentication: "none"
+    update_frequency: "quarterly"
+    license:
+      type: "Open Government Licence v3.0"
+      url: "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+      summary: "Grid codes and industry codes are publicly available"
+    coverage:
+      scope: "Grid Code, CUSC, BSC, STC, DCUSA, SQSS, balancing rules, connection requirements"
+      item_count: 0
+    languages:
+      - "en"
+
+  - name: "DESNZ (Department for Energy Security and Net Zero)"
+    authority: "DESNZ"
+    official_url: "https://gov.uk/government/organisations/department-for-energy-security-and-net-zero"
+    retrieval_method: "MANUAL_CURATION"
+    format: "HTML"
+    authentication: "none"
+    update_frequency: "quarterly"
+    license:
+      type: "Open Government Licence v3.0"
+      url: "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+      summary: "UK government publications are freely available under OGL"
+    coverage:
+      scope: "Energy Acts, statutory instruments, CfD policy, net zero strategy"
+      item_count: 0
+    languages:
+      - "en"
+
+  - name: "HSE Energy Division (Health and Safety Executive)"
+    authority: "HSE"
+    official_url: "https://hse.gov.uk/energy"
+    retrieval_method: "MANUAL_CURATION"
+    format: "HTML"
+    authentication: "none"
+    update_frequency: "quarterly"
+    license:
+      type: "Open Government Licence v3.0"
+      url: "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+      summary: "UK government publications are freely available under OGL"
+    coverage:
+      scope: "Offshore safety, gas safety, electrical safety regulations"
+      item_count: 0
+    languages:
+      - "en"
+
+  - name: "UK Legislation (legislation.gov.uk)"
+    authority: "The National Archives"
+    official_url: "https://legislation.gov.uk"
+    retrieval_method: "MANUAL_CURATION"
+    format: "HTML"
+    authentication: "none"
+    update_frequency: "quarterly"
+    license:
+      type: "Open Government Licence v3.0"
+      url: "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+      summary: "UK legislation is Crown Copyright, freely available under OGL"
+    coverage:
+      scope: "Electricity Act 1989, Gas Act 1986, Energy Act 2023, statutory instruments"
+      item_count: 0
+    languages:
+      - "en"
