@@ -1,8 +1,54 @@
 # British Energy Regulation MCP
 
+<!-- ANSVAR-CTA-BEGIN -->
+> ### ▶ Try this MCP instantly via Ansvar Gateway
+> **50 free queries/day · no card required · OAuth signup at [ansvar.eu/gateway](https://ansvar.eu/gateway)**
+>
+> One endpoint, one OAuth signup, access from any MCP-compatible client.
+
+### Connect
+
+**Claude Code** (one line):
+
+```bash
+claude mcp add ansvar --transport http https://gateway.ansvar.eu/mcp
+```
+
+**Claude Desktop / Cursor** — add to `claude_desktop_config.json` (or `mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "ansvar": {
+      "type": "url",
+      "url": "https://gateway.ansvar.eu/mcp"
+    }
+  }
+}
+```
+
+**Claude.ai** — Settings → Connectors → Add custom connector → paste `https://gateway.ansvar.eu/mcp`
+
+First request opens an OAuth flow at [ansvar.eu/gateway](https://ansvar.eu/gateway). After signup, your client is bound to your account; tier (free / premium / team / company) determines fan-out, quota, and which downstream MCPs are reachable.
+
+---
+
+## Self-host this MCP
+
+You can also clone this repo and build the corpus yourself. The schema,
+fetcher, and tool implementations all live here. What is not in the repo is
+the pre-built database — TDM and standards-licensing constraints on the
+upstream sources mean we host the corpus on Ansvar infrastructure rather
+than redistribute it as a public artifact.
+
+Build your own: run this repo's ingestion script (entry-point varies per
+repo — typically `scripts/ingest.sh`, `npm run ingest`, or `make ingest`;
+check the repo root).
+<!-- ANSVAR-CTA-END -->
+
+
 MCP server for British energy sector regulations -- Ofgem RIIO price controls, NESO grid codes, DESNZ energy policy, HSE safety rules.
 
-[![npm version](https://badge.fury.io/js/@ansvar%2Fbritish-energy-regulation-mcp.svg)](https://www.npmjs.com/package/@ansvar/british-energy-regulation-mcp)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Covers four British energy regulators with full-text search across regulations, grid codes, and regulatory decisions. All data is in English.
@@ -19,51 +65,6 @@ Built by [Ansvar Systems](https://ansvar.eu) -- Stockholm, Sweden
 | **NESO** (National Energy System Operator) | Grid codes, balancing mechanism, capacity market, ancillary services, system planning | [nationalgrideso.com](https://nationalgrideso.com) |
 | **DESNZ** (Department for Energy Security and Net Zero) | Energy policy, CfD, capacity market, net zero strategy, hydrogen | [gov.uk/desnz](https://gov.uk/government/organisations/department-for-energy-security-and-net-zero) |
 | **HSE** (Health and Safety Executive, Energy Division) | Offshore safety, gas safety, nuclear safety, COMAH regulations | [hse.gov.uk](https://hse.gov.uk) |
-
----
-
-## Quick Start
-
-### Use Remotely (No Install Needed)
-
-**Endpoint:** `https://mcp.ansvar.eu/british-energy-regulation/mcp`
-
-| Client | How to Connect |
-|--------|---------------|
-| **Claude Desktop** | Add to `claude_desktop_config.json` (see below) |
-| **Claude Code** | `claude mcp add british-energy-regulation --transport http https://mcp.ansvar.eu/british-energy-regulation/mcp` |
-
-**Claude Desktop** -- add to `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "british-energy-regulation": {
-      "type": "url",
-      "url": "https://mcp.ansvar.eu/british-energy-regulation/mcp"
-    }
-  }
-}
-```
-
-### Use Locally (npm)
-
-```bash
-npx @ansvar/british-energy-regulation-mcp
-```
-
-Or add to Claude Desktop config for stdio:
-
-```json
-{
-  "mcpServers": {
-    "british-energy-regulation": {
-      "command": "npx",
-      "args": ["-y", "@ansvar/british-energy-regulation-mcp"]
-    }
-  }
-}
-```
 
 ---
 
