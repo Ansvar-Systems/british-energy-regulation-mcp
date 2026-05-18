@@ -33,6 +33,7 @@ import {
   getRecordCounts,
   getRegulationCountByRegulator,
 } from "./db.js";
+import { buildCitation, buildItemAttribution } from './citation.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -59,30 +60,11 @@ const TOOLS = [
     inputSchema: {
       type: "object" as const,
       properties: {
-        query: {
-          type: "string",
-          description:
-            "Search query (e.g., 'electricity act', 'RIIO', 'capacity market', 'supplier obligation', 'net zero')",
-        },
-        regulator: {
-          type: "string",
-          enum: ["ofgem", "desnz", "hse"],
-          description: "Filter by regulator. Optional.",
-        },
-        type: {
-          type: "string",
-          enum: ["act", "statutory_instrument", "licence_condition", "guidance"],
-          description: "Filter by regulation type. Optional.",
-        },
-        status: {
-          type: "string",
-          enum: ["in_force", "repealed", "draft"],
-          description: "Filter by status. Defaults to all.",
-        },
-        limit: {
-          type: "number",
-          description: "Maximum results (default 20, max 100).",
-        },
+        query: { type: "string", description: "Search query (e.g., 'electricity act', 'RIIO', 'capacity market', 'supplier obligation', 'net zero')" },
+        regulator: { type: "string", enum: ["ofgem", "desnz", "hse"], description: "Filter by regulator. Optional." },
+        type: { type: "string", enum: ["act", "statutory_instrument", "licence_condition", "guidance"], description: "Filter by regulation type. Optional." },
+        status: { type: "string", enum: ["in_force", "repealed", "draft"], description: "Filter by status. Defaults to all." },
+        limit: { type: "number", description: "Maximum results (default 20, max 100)." },
       },
       required: ["query"],
     },
@@ -94,10 +76,7 @@ const TOOLS = [
     inputSchema: {
       type: "object" as const,
       properties: {
-        reference: {
-          type: "string",
-          description: "Regulation reference (e.g., 'Electricity Act 1989 c.29')",
-        },
+        reference: { type: "string", description: "Regulation reference (e.g., 'Electricity Act 1989 c.29')" },
       },
       required: ["reference"],
     },
@@ -109,20 +88,9 @@ const TOOLS = [
     inputSchema: {
       type: "object" as const,
       properties: {
-        query: {
-          type: "string",
-          description:
-            "Search query (e.g., 'balancing', 'grid code', 'connection', 'frequency response', 'capacity market')",
-        },
-        code_type: {
-          type: "string",
-          enum: ["grid_code", "industry_code", "connection_requirement", "balancing", "ancillary_services"],
-          description: "Filter by code type. Optional.",
-        },
-        limit: {
-          type: "number",
-          description: "Maximum results (default 20, max 100).",
-        },
+        query: { type: "string", description: "Search query (e.g., 'balancing', 'grid code', 'connection', 'frequency response', 'capacity market')" },
+        code_type: { type: "string", enum: ["grid_code", "industry_code", "connection_requirement", "balancing", "ancillary_services"], description: "Filter by code type. Optional." },
+        limit: { type: "number", description: "Maximum results (default 20, max 100)." },
       },
       required: ["query"],
     },
@@ -134,10 +102,7 @@ const TOOLS = [
     inputSchema: {
       type: "object" as const,
       properties: {
-        document_id: {
-          type: "number",
-          description: "Grid code document ID (from search results)",
-        },
+        document_id: { type: "number", description: "Grid code document ID (from search results)" },
       },
       required: ["document_id"],
     },
@@ -149,20 +114,9 @@ const TOOLS = [
     inputSchema: {
       type: "object" as const,
       properties: {
-        query: {
-          type: "string",
-          description:
-            "Search query (e.g., 'price control', 'RIIO-ED2', 'supplier of last resort', 'CfD allocation', 'network tariff')",
-        },
-        decision_type: {
-          type: "string",
-          enum: ["price_control", "market_reform", "licensing", "enforcement", "network_tariff", "consumer_protection"],
-          description: "Filter by decision type. Optional.",
-        },
-        limit: {
-          type: "number",
-          description: "Maximum results (default 20, max 100).",
-        },
+        query: { type: "string", description: "Search query (e.g., 'price control', 'RIIO-ED2', 'supplier of last resort', 'CfD allocation', 'network tariff')" },
+        decision_type: { type: "string", enum: ["price_control", "market_reform", "licensing", "enforcement", "network_tariff", "consumer_protection"], description: "Filter by decision type. Optional." },
+        limit: { type: "number", description: "Maximum results (default 20, max 100)." },
       },
       required: ["query"],
     },
@@ -171,31 +125,19 @@ const TOOLS = [
     name: "gb_energy_about",
     description:
       "British energy regulation MCP server. Covers Ofgem (RIIO price controls and market reform), NESO (grid codes and capacity market), DESNZ (energy policy and CfD), and HSE (offshore and gas safety).",
-    inputSchema: {
-      type: "object" as const,
-      properties: {},
-      required: [],
-    },
+    inputSchema: { type: "object" as const, properties: {}, required: [] },
   },
   {
     name: "gb_energy_list_sources",
     description:
       "List data sources with record counts, provenance URLs, and last refresh dates.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {},
-      required: [],
-    },
+    inputSchema: { type: "object" as const, properties: {}, required: [] },
   },
   {
     name: "gb_energy_check_data_freshness",
     description:
       "Check data freshness for each source. Reports staleness and provides update instructions.",
-    inputSchema: {
-      type: "object" as const,
-      properties: {},
-      required: [],
-    },
+    inputSchema: { type: "object" as const, properties: {}, required: [] },
   },
 ];
 
@@ -203,43 +145,25 @@ const TOOLS = [
 
 const SearchRegulationsArgs = z.object({
   query: z.string().min(1),
-  regulator: z
-    .enum(["ofgem", "desnz", "hse"])
-    .optional(),
-  type: z
-    .enum(["act", "statutory_instrument", "licence_condition", "guidance"])
-    .optional(),
+  regulator: z.enum(["ofgem", "desnz", "hse"]).optional(),
+  type: z.enum(["act", "statutory_instrument", "licence_condition", "guidance"]).optional(),
   status: z.enum(["in_force", "repealed", "draft"]).optional(),
   limit: z.number().int().positive().max(100).optional(),
 });
 
-const GetRegulationArgs = z.object({
-  reference: z.string().min(1),
-});
+const GetRegulationArgs = z.object({ reference: z.string().min(1) });
 
 const SearchGridCodesArgs = z.object({
   query: z.string().min(1),
-  code_type: z
-    .enum([
-      "grid_code",
-      "industry_code",
-      "connection_requirement",
-      "balancing",
-      "ancillary_services",
-    ])
-    .optional(),
+  code_type: z.enum(["grid_code", "industry_code", "connection_requirement", "balancing", "ancillary_services"]).optional(),
   limit: z.number().int().positive().max(100).optional(),
 });
 
-const GetGridCodeArgs = z.object({
-  document_id: z.number().int().positive(),
-});
+const GetGridCodeArgs = z.object({ document_id: z.number().int().positive() });
 
 const SearchDecisionsArgs = z.object({
   query: z.string().min(1),
-  decision_type: z
-    .enum(["price_control", "market_reform", "licensing", "enforcement", "network_tariff", "consumer_protection"])
-    .optional(),
+  decision_type: z.enum(["price_control", "market_reform", "licensing", "enforcement", "network_tariff", "consumer_protection"]).optional(),
   limit: z.number().int().positive().max(100).optional(),
 });
 
@@ -272,7 +196,7 @@ function makeMeta() {
 function textContent(data: unknown) {
   const payload =
     data !== null && typeof data === "object" && !Array.isArray(data)
-      ? { ...(data as Record<string, unknown>), ...makeMeta() }
+      ? { ...(data as unknown as Record<string, unknown>), ...makeMeta() }
       : { data, ...makeMeta() };
   return {
     content: [
@@ -318,7 +242,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           status: parsed.status,
           limit: parsed.limit,
         });
-        return textContent({ results, count: results.length });
+        const resultsWithCitation = results.map((__r) => {
+          const __row = __r as unknown as Record<string, unknown>;
+          return {
+            ...__row,
+            _citation: buildItemAttribution(
+              __row["url"] != null ? String(__row["url"]) : (__row["source_url"] != null ? String(__row["source_url"]) : undefined),
+            ),
+          };
+        });
+        return textContent({ results: resultsWithCitation, count: resultsWithCitation.length });
       }
 
       case "gb_energy_get_regulation": {
@@ -327,7 +260,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!regulation) {
           return errorContent(`Regulation not found: ${parsed.reference}`);
         }
-        return textContent(regulation);
+        return textContent({
+          ...(typeof regulation === 'object' ? regulation : { data: regulation }),
+          _citation: buildCitation(
+            regulation.reference || parsed.reference,
+            regulation.title || parsed.reference,
+            'gb_energy_get_regulation',
+            { reference: parsed.reference },
+            regulation.url || null,
+          ),
+        });
       }
 
       case "gb_energy_search_grid_codes": {
@@ -337,7 +279,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           code_type: parsed.code_type,
           limit: parsed.limit,
         });
-        return textContent({ results, count: results.length });
+        const resultsWithCitation = results.map((__r) => {
+          const __row = __r as unknown as Record<string, unknown>;
+          return {
+            ...__row,
+            _citation: buildItemAttribution(
+              __row["url"] != null ? String(__row["url"]) : (__row["source_url"] != null ? String(__row["source_url"]) : undefined),
+            ),
+          };
+        });
+        return textContent({ results: resultsWithCitation, count: resultsWithCitation.length });
       }
 
       case "gb_energy_get_grid_code": {
@@ -346,7 +297,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!code) {
           return errorContent(`Grid code not found: ID ${parsed.document_id}`);
         }
-        return textContent(code);
+        return textContent({
+          ...(typeof code === 'object' ? code : { data: code }),
+          _citation: buildCitation(
+            code.reference || String(parsed.document_id),
+            code.title || `Grid Code ${parsed.document_id}`,
+            'gb_energy_get_grid_code',
+            { document_id: String(parsed.document_id) },
+            code.url || null,
+          ),
+        });
       }
 
       case "gb_energy_search_decisions": {
@@ -356,7 +316,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           decision_type: parsed.decision_type,
           limit: parsed.limit,
         });
-        return textContent({ results, count: results.length });
+        const resultsWithCitation = results.map((__r) => {
+          const __row = __r as unknown as Record<string, unknown>;
+          return {
+            ...__row,
+            _citation: buildItemAttribution(
+              __row["url"] != null ? String(__row["url"]) : (__row["source_url"] != null ? String(__row["source_url"]) : undefined),
+            ),
+          };
+        });
+        return textContent({ results: resultsWithCitation, count: resultsWithCitation.length });
       }
 
       case "gb_energy_about": {
@@ -366,11 +335,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           version: pkgVersion,
           description:
             "British energy regulation MCP server. Covers Ofgem (RIIO price controls and market reform), NESO (grid codes and capacity market), DESNZ (energy policy and CfD), and HSE (offshore and gas safety).",
-          regulators: regulators.map((r) => ({
-            id: r.id,
-            name: r.name,
-            url: r.url,
-          })),
+          regulators: regulators.map((r) => ({ id: r.id, name: r.name, url: r.url })),
           tools: TOOLS.map((t) => ({ name: t.name, description: t.description })),
         });
       }
@@ -378,98 +343,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "gb_energy_list_sources": {
         const counts = getRecordCounts();
         const sources = [
-          {
-            id: "ofgem",
-            name: "Ofgem (Office of Gas and Electricity Markets)",
-            url: "https://ofgem.gov.uk",
-            record_count: getRegulationCountByRegulator("ofgem"),
-            data_type: "regulations",
-            last_refresh: dbBuildDate(),
-            refresh_frequency: "quarterly",
-          },
-          {
-            id: "neso",
-            name: "NESO (National Energy System Operator)",
-            url: "https://nationalgrideso.com",
-            record_count: counts.grid_codes,
-            data_type: "grid_codes",
-            last_refresh: dbBuildDate(),
-            refresh_frequency: "quarterly",
-          },
-          {
-            id: "desnz",
-            name: "DESNZ (Department for Energy Security and Net Zero)",
-            url: "https://gov.uk/government/organisations/department-for-energy-security-and-net-zero",
-            record_count:
-              getRegulationCountByRegulator("desnz") + counts.decisions,
-            data_type: "regulations + decisions",
-            last_refresh: dbBuildDate(),
-            refresh_frequency: "quarterly",
-          },
-          {
-            id: "hse",
-            name: "HSE Energy Division (Health and Safety Executive)",
-            url: "https://hse.gov.uk/energy",
-            record_count: getRegulationCountByRegulator("hse"),
-            data_type: "regulations",
-            last_refresh: dbBuildDate(),
-            refresh_frequency: "quarterly",
-          },
+          { id: "ofgem", name: "Ofgem (Office of Gas and Electricity Markets)", url: "https://ofgem.gov.uk", record_count: getRegulationCountByRegulator("ofgem"), data_type: "regulations", last_refresh: dbBuildDate(), refresh_frequency: "quarterly" },
+          { id: "neso", name: "NESO (National Energy System Operator)", url: "https://nationalgrideso.com", record_count: counts.grid_codes, data_type: "grid_codes", last_refresh: dbBuildDate(), refresh_frequency: "quarterly" },
+          { id: "desnz", name: "DESNZ (Department for Energy Security and Net Zero)", url: "https://gov.uk/government/organisations/department-for-energy-security-and-net-zero", record_count: getRegulationCountByRegulator("desnz") + counts.decisions, data_type: "regulations + decisions", last_refresh: dbBuildDate(), refresh_frequency: "quarterly" },
+          { id: "hse", name: "HSE Energy Division (Health and Safety Executive)", url: "https://hse.gov.uk/energy", record_count: getRegulationCountByRegulator("hse"), data_type: "regulations", last_refresh: dbBuildDate(), refresh_frequency: "quarterly" },
         ];
-        return textContent({
-          sources,
-          total_records: counts.regulations + counts.grid_codes + counts.decisions,
-        });
+        return textContent({ sources, total_records: counts.regulations + counts.grid_codes + counts.decisions });
       }
 
       case "gb_energy_check_data_freshness": {
         const buildDate = dbBuildDate();
         const buildMs = buildDate !== "unknown" ? Date.parse(buildDate) : NaN;
         const nowMs = Date.now();
-
-        const frequencyDays: Record<string, number> = {
-          quarterly: 90,
-        };
-
+        const frequencyDays: Record<string, number> = { quarterly: 90 };
         const sourceEntries = [
           { source: "Ofgem (ofgem.gov.uk)", frequency: "quarterly" },
           { source: "NESO (nationalgrideso.com)", frequency: "quarterly" },
           { source: "DESNZ (gov.uk/desnz)", frequency: "quarterly" },
           { source: "HSE (hse.gov.uk/energy)", frequency: "quarterly" },
         ];
-
         const rows = sourceEntries.map((s) => {
           let status = "Unknown";
           if (!isNaN(buildMs)) {
             const thresholdMs = (frequencyDays[s.frequency] ?? 90) * 86_400_000;
             const ageMs = nowMs - buildMs;
-            if (ageMs <= thresholdMs) {
-              status = "Current";
-            } else if (ageMs <= thresholdMs * 1.5) {
-              status = "Due";
-            } else {
-              status = "OVERDUE";
-            }
+            if (ageMs <= thresholdMs) { status = "Current"; }
+            else if (ageMs <= thresholdMs * 1.5) { status = "Due"; }
+            else { status = "OVERDUE"; }
           }
           return { source: s.source, last_refresh: buildDate, frequency: s.frequency, status };
         });
-
         const header = "| Source | Last Refresh | Frequency | Status |";
         const sep = "|---|---|---|---|";
-        const tableRows = rows.map(
-          (r) => `| ${r.source} | ${r.last_refresh} | ${r.frequency} | ${r.status} |`,
-        );
+        const tableRows = rows.map((r) => `| ${r.source} | ${r.last_refresh} | ${r.frequency} | ${r.status} |`);
         const table = [header, sep, ...tableRows].join("\n");
-
-        const updateInstructions =
-          "To refresh data, run: npx tsx scripts/ingest-all.ts --force";
-
-        return textContent({
-          freshness_table: table,
-          build_date: buildDate,
-          update_instructions: updateInstructions,
-          entries: rows,
-        });
+        const updateInstructions = "To refresh data, run: npx tsx scripts/ingest-all.ts --force";
+        return textContent({ freshness_table: table, build_date: buildDate, update_instructions: updateInstructions, entries: rows });
       }
 
       default:
