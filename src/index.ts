@@ -255,10 +255,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           ...(typeof regulation === 'object' ? regulation : { data: regulation }),
           _citation: buildCitation(
             regulation.reference || parsed.reference,
-            regulation.title || regulation.name || parsed.reference,
+            regulation.title || parsed.reference,
             'gb_energy_get_regulation',
             { reference: parsed.reference },
-            regulation.url || regulation.source_url || null,
+            regulation.url || null,
           ),
         });
       }
@@ -282,11 +282,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return textContent({
           ...(typeof code === 'object' ? code : { data: code }),
           _citation: buildCitation(
-            code.reference || code.code_ref || String(parsed.document_id),
-            code.title || code.name || `Grid Code ${parsed.document_id}`,
+            code.reference || String(parsed.document_id),
+            code.title || `Grid Code ${parsed.document_id}`,
             'gb_energy_get_grid_code',
             { document_id: String(parsed.document_id) },
-            code.url || code.source_url || null,
+            code.url || null,
           ),
         });
       }
