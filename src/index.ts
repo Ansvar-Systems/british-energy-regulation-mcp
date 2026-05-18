@@ -196,7 +196,7 @@ function makeMeta() {
 function textContent(data: unknown) {
   const payload =
     data !== null && typeof data === "object" && !Array.isArray(data)
-      ? { ...(data as Record<string, unknown>), ...makeMeta() }
+      ? { ...(data as unknown as Record<string, unknown>), ...makeMeta() }
       : { data, ...makeMeta() };
   return {
     content: [
